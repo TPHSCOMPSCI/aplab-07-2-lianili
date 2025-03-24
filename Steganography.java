@@ -7,21 +7,29 @@ public class Steganography {
         // Picture copy = testClearLow(beach);
         // copy.explore();
 
-        // Picture beach2 = new Picture("beach.jpg");
-        // beach2.explore();
-        // Picture copy2 = testSetLow(beach2, Color.PINK);
-        // copy2.explore(); 
-        // Picture copy3 = revealPicture(copy2);
-        // copy3.explore();
+        Picture beach2 = new Picture("beach.jpg");
+        beach2.explore();
+        Picture copy2 = testSetLow(beach2, Color.PINK);
+        copy2.explore(); 
+        Picture copy3 = revealPicture(copy2);
+        copy3.explore();
+
+        //revealPicture does not reveal flower2.
+        //I implemented the algorithm correctly, as shown in page 7.
+        //in the lab handbook. However, collegeboard is
+        //lying on page 8 when they say that they "revealed"
+        //the "hidden" arch.jpg image. The image should be significantly
+        //distorted because it's basically arch.jpg except the lowest
+        //6 bits are cut off. They reused arch.jpg, no distortion seen.
         
-        Picture flower1 = new Picture("flower1.jpg");
-        // flower1.explore();
-        Picture flower2 = new Picture("flower2.jpg");
-        Picture modifiedflower1 = hidePicture(flower1, flower2);
-        modifiedflower1.explore();
-        Picture revealModification = revealPicture(modifiedflower1);
-        revealModification.explore();
-        //40, 35. G decreases by 3, proof hide pic works.
+        // Picture flower1 = new Picture("flower1.jpg");
+        // // flower1.explore();
+        // Picture flower2 = new Picture("flower2.jpg");
+        // Picture modifiedflower1 = hidePicture(flower1, flower2);
+        // modifiedflower1.explore();
+        // Picture revealModification = revealPicture(modifiedflower1);
+        // revealModification.explore();
+        // //40, 35. G decreases by 3, proof hide pic works.
     }
 
     /**
@@ -53,13 +61,13 @@ public class Steganography {
     * Set the lower 2 bits in a pixel to the highest 2 bits in c
     */
     public static void setLow(Pixel p, Color c){
-        int choppedRed = (int)(c.getRed() / 64);
-        int choppedGreen = (int)(c.getGreen() / 64);
-        int choppedBlue = (int)(c.getBlue() / 64);
         clearLow(p);
-        p.setRed(p.getRed() + choppedRed);
-        p.setGreen(p.getGreen() + choppedGreen);
-        p.setBlue(p.getBlue() + choppedBlue);
+        int newRed = p.getRed()+ (int)(c.getRed() / 64);
+        int newGreen = p.getGreen() + (int)(c.getGreen() / 64);
+        int newBlue = p.getBlue() + (int)(c.getBlue() / 64);
+        p.setRed(newRed);
+        p.setGreen(newGreen);
+        p.setBlue(newBlue);
     }
 
     /*
@@ -86,7 +94,12 @@ public class Steganography {
                 Color col = source[r][c].getColor();
                 Pixel pix = pixels[r][c];
                 pix.setColor(Color.BLACK);
-                setLow(pix, col);
+                // setLow(pix, col); This method would only take the two highest bits from col. We want the two lowest bits from col.
+                // Then set the two highest bits in pix to col's two lowest bits.
+                // How to isolate the two lowest bits of col?
+                // OF COURSE, YOU DO MODULUS DUMMY HAHAHA LIEK OBVIOUSLY IN THE HANDBOOK SAYS SO (it doesnt say anything about modulus and bit operations)
+                int choppedRed = 
+
                 pix.setRed(pix.getRed() * 64);
                 pix.setBlue(pix.getBlue() * 64);
                 pix.setGreen(pix.getGreen() * 64);
