@@ -43,22 +43,38 @@ public class Steganography {
         // System.out.println("Swan and swan2 are the same (after clearLow run on swan): "
         // + isSame(swan, swan2));
 
-        Picture arch = new Picture("arch.jpg");
-        Picture arch2 = new Picture("arch.jpg");
-        Picture koala = new Picture("koala.jpg") ;
-        Picture robot1 = new Picture("robot.jpg");
-        ArrayList<Point> pointList = findDifferences(arch, arch2);
-        System.out.println("PointList after comparing two identical pictures " +
-        "has a size of " + pointList.size());
-        pointList = findDifferences(arch, koala);
-        System.out.println("PointList after comparing two different sized pictures " +
-        "has a size of " + pointList.size());
-        Picture modifiedArch = hidePicture(arch, robot1, 65, 102);
-        pointList = findDifferences(arch, modifiedArch);
-        System.out.println("Pointlist after hiding a picture has a size of"
-        + pointList.size());
-        arch.show();
-        arch2.show(); 
+        // Picture arch = new Picture("arch.jpg");
+        // Picture arch2 = new Picture("arch.jpg");
+        // Picture koala = new Picture("koala.jpg") ;
+        // Picture robot1 = new Picture("robot.jpg");
+        // ArrayList<Point> pointList = findDifferences(arch, arch2);
+        // System.out.println("PointList after comparing two identical pictures " +
+        // "has a size of " + pointList.size());
+        // pointList = findDifferences(arch, koala);
+        // System.out.println("PointList after comparing two different sized pictures " +
+        // "has a size of " + pointList.size());
+        // Picture modifiedArch = hidePicture(arch, robot1, 65, 102);
+        // pointList = findDifferences(arch, modifiedArch);
+        // System.out.println("Pointlist after hiding a picture has a size of"
+        // + pointList.size());
+        // arch.show();
+        // arch2.show(); 
+
+        Picture hall = new Picture("femaleLionAndHall.jpg");
+        Picture robot2 = new Picture("robot.jpg");
+        Picture flower2 = new Picture("flower1.jpg");
+        // hide pictures
+        Picture hall2 = hidePicture(hall, robot2, 50, 300);
+        Picture hall3 = hidePicture(hall2, flower2, 115, 275);
+        hall3.explore();
+        if(!isSame(hall, hall3))
+        {
+        Picture hall4 = showDifferentArea(hall r ,
+        findDiffferences(hall, hall3));
+        hall4.show();
+        Picture unhiddenHall3 = revealPicture(hall3);
+        unhiddenHall3.show();
+} 
     }
 
     /**
@@ -245,7 +261,14 @@ public class Steganography {
         return differences;
     }
 
-    public static Picture showDifferentArea(Picture picture1, Picture picture2){
-        
+    public static Picture showDifferentArea(Picture picture1, ArrayList<Point> differentPoints){
+        Picture modifiedPicture = new Picture(picture1);
+        for(Point p : differentPoints){
+            int x = (int) p.getX();
+            int y = (int) p.getY();
+            Pixel pix = modifiedPicture.getPixel(x, y);
+            pix.setColor(new Color(192,192,192));
+        }
+        return modifiedPicture;
     }
 }
