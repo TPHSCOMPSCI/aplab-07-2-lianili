@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Steganography {
     public static void main(String[] args){
@@ -7,29 +8,57 @@ public class Steganography {
         // Picture copy = testClearLow(beach);
         // copy.explore();
 
-        Picture beach2 = new Picture("beach.jpg");
-        beach2.explore();
-        Picture copy2 = testSetLow(beach2, Color.PINK);
-        copy2.explore(); 
-        Picture copy3 = revealPicture(copy2);
-        copy3.explore();
+        // Picture beach2 = new Picture("beach.jpg");
+        // beach2.explore();
+        // Picture copy2 = testSetLow(beach2, Color.PINK);
+        // copy2.explore(); 
+        // Picture copy3 = revealPicture(copy2);
+        // copy3.explore();
 
-        //revealPicture does not reveal flower2.
-        //I implemented the algorithm correctly, as shown in page 7.
-        //in the lab handbook. However, collegeboard is
-        //lying on page 8 when they say that they "revealed"
-        //the "hidden" arch.jpg image. The image should be significantly
-        //distorted because it's basically arch.jpg except the lowest
-        //6 bits are cut off. They reused arch.jpg, no distortion seen.
-        
         // Picture flower1 = new Picture("flower1.jpg");
-        // // flower1.explore();
         // Picture flower2 = new Picture("flower2.jpg");
-        // Picture modifiedflower1 = hidePicture(flower1, flower2);
-        // modifiedflower1.explore();
-        // Picture revealModification = revealPicture(modifiedflower1);
-        // revealModification.explore();
-        // //40, 35. G decreases by 3, proof hide pic works.
+        // if (canHide(flower1, flower2)){
+        //     Picture modifiedflower1 = hidePicture(flower1, flower2);
+        //     modifiedflower1.explore();
+        //     Picture revealModification = revealPicture(modifiedflower1);
+        //     revealModification.explore();
+        // }
+
+        // Picture beach = new Picture("beach.jpg");
+        // Picture robot = new Picture("robot.jpg");
+        // Picture flower1 = new Picture("flower1.jpg");
+        // beach.explore();
+        // // these lines hide 2 pictures
+        // Picture hidden1 = hidePicture(beach, robot, 65, 208);
+        // Picture hidden2 = hidePicture(hidden1, flower1, 280, 110);
+        // hidden2.explore();
+        // Picture unhidden = revealPicture(hidden2);
+        // unhidden.explore();
+
+        // Picture swan = new Picture("swan.jpg");
+        // Picture swan2 = new Picture("swan.jpg");
+        // System.out.println("Swan and swan2 are the same: " +
+        // isSame(swan, swan2));
+        // swan = testClearLow(swan);
+        // System.out.println("Swan and swan2 are the same (after clearLow run on swan): "
+        // + isSame(swan, swan2));
+
+        Picture arch = new Picture("arch.jpg");
+        Picture arch2 = new Picture("arch.jpg");
+        Picture koala = new Picture("koala.jpg") ;
+        Picture robot1 = new Picture("robot.jpg");
+        ArrayList<Point> pointList = findDifferences(arch, arch2);
+        System.out.println("PointList after comparing two identical pictures " +
+        "has a size of " + pointList.size());
+        pointList = findDifferences(arch, koala);
+        System.out.println("PointList after comparing two different sized pictures " +
+        "has a size of " + pointList.size());
+        Picture modifiedArch = hidePicture(arch, robot1, 65, 102);
+        pointList = findDifferences(arch, modifiedArch);
+        System.out.println("Pointlist after hiding a picture has a size of"
+        + pointList.size());
+        arch.show();
+        arch2.show(); 
     }
 
     /**
@@ -97,12 +126,13 @@ public class Steganography {
                 // setLow(pix, col); This method would only take the two highest bits from col. We want the two lowest bits from col.
                 // Then set the two highest bits in pix to col's two lowest bits.
                 // How to isolate the two lowest bits of col?
-                // OF COURSE, YOU DO MODULUS DUMMY HAHAHA LIEK OBVIOUSLY IN THE HANDBOOK SAYS SO (it doesnt say anything about modulus and bit operations)
-                int choppedRed = 
-
-                pix.setRed(pix.getRed() * 64);
-                pix.setBlue(pix.getBlue() * 64);
-                pix.setGreen(pix.getGreen() * 64);
+                // You do modulus
+                int choppedRed = col.getRed() % 4;
+                int choppedBlue = col.getBlue() % 4;
+                int choppedGreen = col.getGreen() % 4;
+                pix.setRed(choppedRed * 64);
+                pix.setBlue(choppedBlue * 64);
+                pix.setGreen(choppedGreen * 64);
             }
         }
         return copy;
@@ -142,5 +172,80 @@ public class Steganography {
             }
         }
         return modifiedPic;
+    }
+
+    /**
+     * Creates new Picture with a smaller picture hidden in a bigger picture at the specified row and column
+     * @param source
+     * @param secret
+     * @param row
+     * @param column
+     * @return
+     */
+    public static Picture hidePicture(Picture source, Picture secret, int row, int column){
+        Picture modifiedPic = new Picture(source);
+        Pixel[][] modifiedPixels = modifiedPic.getPixels2D();
+        Pixel[][] secretPixels = secret.getPixels2D();
+        for(int r = 0; r < secretPixels.length; r++){
+            for(int c = 0; c < secretPixels[r].length; c++){
+                Pixel modifiedPixel = modifiedPixels[r + row][c + column];
+                Color secretColor = secretPixels[r][c].getColor();
+                setLow(modifiedPixel, secretColor);
+            }
+        }
+        return modifiedPic;
+    }
+
+    /**
+     * Returns if the size and colors of the picture1 and picture2 are the same
+     * @param picture1
+     * @param picture2
+     * @return
+     */
+    public static boolean isSame(Picture picture1, Picture picture2){
+        boolean same = false;
+
+        if (!canHide(picture1, picture2)){
+            same = false;
+        } else {
+            Pixel[][] pixels1 = picture1.getPixels2D();
+            Pixel[][] pixels2 = picture2.getPixels2D();
+            boolean sameColor = true;
+            for(int r = 0; r < pixels1.length; r++){
+                for(int c = 0; c < pixels2[r].length; c++){
+                    if(!pixels1[r][c].getColor().equals(pixels2[r][c].getColor())){
+                        sameColor = false;
+                    }
+                }
+            }
+
+            if (sameColor){
+                same = true;
+            }
+        }
+        
+        return same;
+    }
+
+    public static ArrayList<Point> findDifferences(Picture picture1, Picture picture2){
+        ArrayList<Point> differences = new ArrayList<Point>();
+        if(!canHide(picture1, picture2)){
+            return differences;
+        }
+
+        Pixel[][] pixels1 = picture1.getPixels2D();
+        Pixel[][] pixels2 = picture2.getPixels2D();
+        for(int r = 0; r < pixels1.length; r++){
+            for(int c = 0; c < pixels1[r].length; c++){
+                if(!pixels1[r][c].getColor().equals(pixels2[r][c].getColor())){
+                    differences.add(new Point(r,c));
+                }
+            }
+        }
+        return differences;
+    }
+
+    public static Picture showDifferentArea(Picture picture1, Picture picture2){
+        
     }
 }
